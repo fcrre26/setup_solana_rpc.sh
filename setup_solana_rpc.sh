@@ -164,12 +164,14 @@ ExecStart=/root/sol/bin/validator.sh
 [Install]
 WantedBy=multi-user.target
 EOF
-    systemctl start sol
-    systemctl status sol
-    systemctl stop sol
-    systemctl restart sol
     systemctl daemon-reload
+    systemctl enable sol
+    systemctl start sol
+    echo "Solana RPC节点服务已创建并启动。"
+    # 返回菜单
+    menu
 }
+
 
 # 启动Solana RPC节点
 start_solana_rpc() {
