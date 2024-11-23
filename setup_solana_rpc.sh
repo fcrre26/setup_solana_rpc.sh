@@ -197,9 +197,10 @@ start_solana_rpc() {
 # 查看同步进度
 check_sync_progress() {
     echo "查看同步进度..."
-    solana-keygen pubkey /root/sol/validator-keypair.json
-    solana gossip | grep {pubkey}
-    solana catchup {pubkey}
+    validator_pubkey=$(solana-keygen pubkey /root/sol/validator-keypair.json)
+    echo "您的验证者公钥是：$validator_pubkey"
+    solana gossip | grep "$validator_pubkey"
+    solana catchup "$validator_pubkey"
 }
 
 # 调整SWAP空间
