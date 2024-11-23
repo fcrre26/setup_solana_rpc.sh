@@ -206,7 +206,7 @@ check_sync_progress() {
 }
 
 # 调整SWAP空间
-setup_swap() {
+adjust_swap() {
     echo "调整SWAP空间..."
     echo "请输入SWAP空间大小（例如：120G）："
     read -p "SWAP大小: " swap_size
