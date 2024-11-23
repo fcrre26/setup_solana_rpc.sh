@@ -154,12 +154,6 @@ EOF
     # 使启动脚本可执行
     chmod +x /root/sol/bin/validator.sh
 
-    # 确保 /root/sol/bin/validator.sh 文件存在
-    if [ ! -f /root/sol/bin/validator.sh ]; then
-        echo "创建 validator.sh 失败，请检查权限和路径。"
-        exit 1
-    fi
-
     # 创建 systemd 服务文件
     cat > /etc/systemd/system/sol.service << 'EOF'
 [Unit]
@@ -193,10 +187,10 @@ EOF
     # 打印服务状态
     systemctl status sol
 
-    # 返回菜单
+    # 打印完成信息并返回主菜单
+    echo "Solana 验证器服务已启动并正在运行。"
     menu
 }
-
 
 # 启动Solana RPC节点
 start_solana_rpc() {
