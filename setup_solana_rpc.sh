@@ -74,7 +74,9 @@ download_solana_cli() {
     echo "下载Solana CLI..."
     sh -c "$(curl -sSfL https://release.solana.com/v1.18.15/install)"
     echo 'export PATH="/root/.local/share/solana/install/active_release/bin:$PATH"' >> /root/.bashrc
-    source /root/.bashrc
+    # 立即更新当前终端的 PATH 环境变量
+    export PATH="/root/.local/share/solana/install/active_release/bin:$PATH"
+    # 验证安装
     solana --version
 }
 
