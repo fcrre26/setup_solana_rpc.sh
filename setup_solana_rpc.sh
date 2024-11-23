@@ -112,6 +112,8 @@ enable_firewall() {
 # 创建启动脚本和服务
 create_service() {
     echo "创建启动脚本和服务..."
+
+    # 创建 Solana 验证器启动脚本
     cat > /root/sol/bin/validator.sh << 'EOF'
 #!/bin/bash
 exec solana-validator \
@@ -144,7 +146,11 @@ exec solana-validator \
     --init-complete-file /root/init-completed \
     --log /root/solana-rpc.log
 EOF
+
+    # 使启动脚本可执行
     chmod +x /root/sol/bin/validator.sh
+
+    # 创建 systemd 服务文件
     cat > /etc/systemd/system/sol.service << 'EOF'
 [Unit]
 Description=Solana Validator
@@ -164,10 +170,19 @@ ExecStart=/root/sol/bin/validator.sh
 [Install]
 WantedBy=multi-user.target
 EOF
+
+    # 重新加载 systemd 配置
     systemctl daemon-reload
+
+    # 启用服务
     systemctl enable sol
+
+    # 启动服务
     systemctl start sol
-    echo "Solana RPC节点服务已创建并启动。"
+
+    # 打印服务状态
+    systemctl status sol
+
     # 返回菜单
     menu
 }
