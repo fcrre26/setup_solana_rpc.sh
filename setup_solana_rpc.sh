@@ -206,15 +206,33 @@ check_sync_progress() {
 }
 
 # 调整SWAP空间
-adjust_swap() {
+setup_swap() {
     echo "调整SWAP空间..."
-    # 这里添加调整SWAP空间的命令，例如：
-    # fallocate -l 1G /swapfile
-    # chmod 600 /swapfile
-    # mkswap /swapfile
-    # swapon /swapfile
-    # echo '/swapfile none swap sw 0 0' >> /etc/fstab
-    echo "请根据需要添加调整SWAP空间的命令"
+    echo "请输入SWAP空间大小（例如：120G）："
+    read -p "SWAP大小: " swap_size
+    if [[ -z "$swap_size" ]]; then
+        echo "未输入SWAP空间大小，使用默认值4G。"
+        swap_size="4G"
+    fi
+
+    # 确保输入以G结尾，如果不是，则添加G
+    if [[ "$swap_size" != *G ]]; then
+        swap_size+="G"
+    fi
+
+    # 创建SWAP文件
+    fallocate -l $swap_size /swapfile
+    if [ $? -ne 0 ]; then
+        echo "创建SWAP文件失败，请检查输入的SWAP空间大小是否正确。"
+        return 1
+    fi
+
+    # 设置权限并启用SWAP
+    chmod 600 /swapfile
+    mkswap /swapfile
+    swapon /swapfile
+    echo '/swapfile none swap sw 0 0' >> /etc/fstab
+    echo "SWAP空间已设置为 $swap_size"
 }
 
 # 主循环
