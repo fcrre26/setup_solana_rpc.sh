@@ -35,16 +35,28 @@ menu() {
 
 # 挂载磁盘
 mount_disks() {
-    echo "创建项目目录和挂载磁盘..."
+    echo "检查并挂载磁盘..."
     mkdir -p /root/sol/{accounts,ledger,bin}
-    fdisk /dev/nvme0n1
-    fdisk /dev/nvme1n1
-    mkfs -t ext4 /dev/nvme0n1
-    mkfs -t ext4 /dev/nvme1n1
-    mount /dev/nvme0n1 /root/sol/ledger
-    mount /dev/nvme1n1 /root/sol/accounts
-    echo '/dev/nvme0n1 /root/sol/ledger ext4 defaults 0 0' >> /etc/fstab
-    echo '/dev/nvme1n1 /root/sol/accounts ext4 defaults 0 0' >> /etc/fstab
+
+    # 检查是否已经挂载
+    if mount | grep -q "/root/sol/ledger"; then
+        echo "Ledger disk already mounted."
+    else
+        fdisk /dev/nvme0n1
+        mkfs -t ext4 /dev/nvme0n1
+        mount /dev/nvme0n1 /root/sol/ledger
+        echo '/dev/nvme0n1 /root/sol/ledger ext4 defaults 0 0' >> /etc/fstab
+    fi
+
+    if mount | grep -q "/root/sol/accounts"; then
+        echo "Accounts disk already mounted."
+    else
+        fdisk /dev/nvme1n1
+        mkfs -t ext4 /dev/nvme1n1
+        mount /dev/nvme1n1 /root/sol/accounts
+        echo '/dev/nvme1n1 /root/sol/accounts ext4 defaults 0 0' >> /etc/fstab
+    fi
+
     sync
 }
 
