@@ -16,7 +16,8 @@ menu() {
     echo "7. 创建启动脚本和服务"
     echo "8. 启动Solana RPC节点"
     echo "9. 查看同步进度"
-    echo "10. 退出"
+    echo "10. 调整SWAP空间"
+    echo "11. 退出"
     read -p "输入选项：" option
     case $option in
         1) mount_disks;;
@@ -28,7 +29,8 @@ menu() {
         7) create_service;;
         8) start_solana_rpc;;
         9) check_sync_progress;;
-        10) exit;;
+        10) setup_swap;;
+        11) exit;;
         *) echo "无效选项，请重新输入";;
     esac
 }
@@ -182,6 +184,36 @@ check_sync_progress() {
     solana-keygen pubkey /root/sol/validator-keypair.json
     solana gossip | grep {pubkey}
     solana catchup {pubkey}
+}
+
+# 调整SWAP空间
+setup_swap() {
+    echo "调整SWAP空间..."
+    echo "请输入SWAP空间大小（例如：120G）："
+    read -p "SWAP大小: " swap_size
+    if [[ -z "$swap_size" ]]; then
+        echo "未输入SWAP空间大小，使用默认值4G。"
+        swap_size="4G"
+    fi
+
+    # 确保输入以G结尾，如果不是，则添加G
+    if [[ "$swap_size" != *G ]]; then
+        swap_size+="G"
+    fi
+
+    # 创建SWAP文件
+    fallocate -l $swap_size /swapfile
+    if [ $? -ne 0 ]; then
+        echo "创建SWAP文件失败，请检查输入的SWAP空间大小是否正确。"
+        return 1
+    fi
+
+    # 设置权限并启用SWAP
+    chmod 600 /swapfile
+    mkswap /swapfile
+    swapon /swapfile
+    echo '/swapfile none swap sw 0 0' >> /etc/fstab
+    echo "SWAP空间已设置为 $swap_size"
 }
 
 # 主循环
