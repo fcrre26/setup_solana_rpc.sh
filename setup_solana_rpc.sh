@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# 一键搭建Solana RPC节点脚本
-
-echo "Solana RPC节点搭建脚本"
-
 # 菜单函数
 menu() {
     echo "请选择操作："
@@ -29,7 +25,7 @@ menu() {
         7) create_service;;
         8) start_solana_rpc;;
         9) check_sync_progress;;
-        10) setup_swap;;
+        10) adjust_swap;;
         11) exit;;
         *) echo "无效选项，请重新输入";;
     esac
@@ -40,24 +36,26 @@ mount_disks() {
     echo "检查并挂载磁盘..."
     mkdir -p /root/sol/{accounts,ledger,bin}
 
-    # 检查是否已经挂载
-    if mount | grep -q "/root/sol/ledger"; then
-        echo "Ledger disk already mounted."
-    else
-        fdisk /dev/nvme0n1
-        mkfs -t ext4 /dev/nvme0n1
-        mount /dev/nvme0n1 /root/sol/ledger
-        echo '/dev/nvme0n1 /root/sol/ledger ext4 defaults 0 0' >> /etc/fstab
+    # 自动检测 NVMe 设备
+    nvme_devs=$(ls /dev/nvme*n1 | head -n 1)
+    nvme_devs2=$(ls /dev/nvme*n1 | tail -n 1 | head -n 1)
+
+    if [ -z "$nvme_devs" ]; then
+        echo "未检测到NVMe设备，请检查硬件连接。"
+        return
     fi
 
-    if mount | grep -q "/root/sol/accounts"; then
-        echo "Accounts disk already mounted."
-    else
-        fdisk /dev/nvme1n1
-        mkfs -t ext4 /dev/nvme1n1
-        mount /dev/nvme1n1 /root/sol/accounts
-        echo '/dev/nvme1n1 /root/sol/accounts ext4 defaults 0 0' >> /etc/fstab
-    fi
+    echo "检测到的NVMe设备：$nvme_devs"
+    echo "检测到的第二个NVMe设备：$nvme_devs2"
+
+    # 创建文件系统并挂载
+    mkfs -t ext4 $nvme_devs
+    mount $nvme_devs /root/sol/ledger
+    echo "$nvme_devs /root/sol/ledger ext4 defaults 0 0" >> /etc/fstab"
+
+    mkfs -t ext4 $nvme_devs2
+    mount $nvme_devs2 /root/sol/accounts
+    echo "$nvme_devs2 /root/sol/accounts ext4 defaults 0 0" >> /etc/fstab"
 
     sync
 }
@@ -67,6 +65,7 @@ set_cpu_performance() {
     echo "设置CPU为performance模式..."
     apt install linux-tools-common linux-tools-$(uname -r)
     cpupower frequency-set --governor performance
+    echo "CPU性能模式已设置为performance。"
     watch "grep 'cpu MHz' /proc/cpuinfo"
 }
 
@@ -101,13 +100,13 @@ sys_tuning() {
 # 开启防火墙
 enable_firewall() {
     echo "开启防火墙..."
-    sudo ufw allow 22
-    sudo ufw allow 8000:8020/tcp
-    sudo ufw allow 8000:8020/udp
-    sudo ufw allow 8899
-    sudo ufw allow 8900
-    sudo ufw enable
-    sudo ufw status
+    ufw allow 22
+    ufw allow 8000:8020/tcp
+    ufw allow 8000:8020/udp
+    ufw allow 8899
+    ufw allow 8900
+    ufw enable
+    ufw status
 }
 
 # 创建启动脚本和服务
@@ -187,33 +186,15 @@ check_sync_progress() {
 }
 
 # 调整SWAP空间
-setup_swap() {
+adjust_swap() {
     echo "调整SWAP空间..."
-    echo "请输入SWAP空间大小（例如：120G）："
-    read -p "SWAP大小: " swap_size
-    if [[ -z "$swap_size" ]]; then
-        echo "未输入SWAP空间大小，使用默认值4G。"
-        swap_size="4G"
-    fi
-
-    # 确保输入以G结尾，如果不是，则添加G
-    if [[ "$swap_size" != *G ]]; then
-        swap_size+="G"
-    fi
-
-    # 创建SWAP文件
-    fallocate -l $swap_size /swapfile
-    if [ $? -ne 0 ]; then
-        echo "创建SWAP文件失败，请检查输入的SWAP空间大小是否正确。"
-        return 1
-    fi
-
-    # 设置权限并启用SWAP
-    chmod 600 /swapfile
-    mkswap /swapfile
-    swapon /swapfile
-    echo '/swapfile none swap sw 0 0' >> /etc/fstab
-    echo "SWAP空间已设置为 $swap_size"
+    # 这里添加调整SWAP空间的命令，例如：
+    # fallocate -l 1G /swapfile
+    # chmod 600 /swapfile
+    # mkswap /swapfile
+    # swapon /swapfile
+    # echo '/swapfile none swap sw 0 0' >> /etc/fstab
+    echo "请根据需要添加调整SWAP空间的命令"
 }
 
 # 主循环
