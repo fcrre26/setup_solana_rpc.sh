@@ -111,9 +111,11 @@ enable_firewall() {
     ufw status
 }
 
-# 创建启动脚本和服务
 create_service() {
     echo "创建启动脚本和服务..."
+
+    # 确保 /root/sol 目录存在
+    mkdir -p /root/sol/{accounts,ledger,bin}
 
     # 创建 Solana 验证器启动脚本
     cat > /root/sol/bin/validator.sh << 'EOF'
@@ -151,6 +153,12 @@ EOF
 
     # 使启动脚本可执行
     chmod +x /root/sol/bin/validator.sh
+
+    # 确保 /root/sol/bin/validator.sh 文件存在
+    if [ ! -f /root/sol/bin/validator.sh ]; then
+        echo "创建 validator.sh 失败，请检查权限和路径。"
+        exit 1
+    fi
 
     # 创建 systemd 服务文件
     cat > /etc/systemd/system/sol.service << 'EOF'
