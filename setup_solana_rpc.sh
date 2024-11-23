@@ -149,6 +149,21 @@ exec solana-validator \
     --enable-cpi-and-log-storage \
     --init-complete-file /root/init-completed \
     --log /root/solana-rpc.log
+    # 以下参数按需选择添加
+    # 务必了解每个参数的功能
+    # --rpc-bind-address 0.0.0.0 \
+    # --tpu-enable-udp \
+    # --only-known-rpc \
+    # --rpc-send-default-max-retries 0 \
+    # --rpc-send-service-max-retries 0 \
+    # --rpc-send-retry-ms 2000 \
+    # --minimal-snapshot-download-speed 1073741824 \
+    # --maximum-snapshot-download-abort 3 \
+    # --rpc-send-leader-count 1500 \
+    # --private-rpc \
+    # --accounts-index-memory-limit-mb 1024000 \
+    # --limit-ledger-size 50000000 \
+    # --minimal-snapshot-download-speed 1073741824 \
 EOF
 
     # 使启动脚本可执行
