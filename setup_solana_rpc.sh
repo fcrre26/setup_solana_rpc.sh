@@ -209,10 +209,11 @@ create_service() {
     # 创建 Solana 验证器启动脚本
     cat > /root/sol/bin/validator.sh << 'EOF'
 #!/bin/bash
+
 exec solana-validator \
     --ledger /root/sol/ledger \
     --accounts /root/sol/accounts \
-    --identity /root/sol/validator-keypair.json \
+    --identity /root/validator-keypair.json \
     --known-validator 7Np41oeYqPefeNQEHSv1UDhYrehxin3NStELsSKCT4K2 \
     --known-validator GdnSyH3YtwcxFvQrVVJMm1JhTS4QVX7MFsX56uJLUfiZ \
     --known-validator DE1bawNcRJB9rVm3buyMVfr8mBEoyyu73NBovf2oXJsJ \
@@ -227,30 +228,18 @@ exec solana-validator \
     --no-voting \
     --private-rpc \
     --rpc-port 8899 \
-    --rpc-bind-address 0.0.0.0 \
-    --allow-private-addr \
     --gossip-port 8001 \
     --dynamic-port-range 8000-8020 \
     --wal-recovery-mode skip_any_corrupted_record \
-    --limit-ledger-size 50000000 \
+    --limit-ledger-size \
     --account-index program-id \
+    --account-index spl-token-mint \
+    --account-index spl-token-owner \
     --enable-rpc-transaction-history \
     --enable-cpi-and-log-storage \
     --init-complete-file /root/init-completed \
-    --log /root/solana-rpc.log \
-    --accounts-index-memory-limit-mb 1024000 \
-    --maximum-local-snapshot-age 500 \
-    --minimal-snapshot-download-speed 1073741824 \
-    --maximum-snapshot-download-abort 3 \
-    --rpc-send-leader-count 1500 \
-    --no-port-check \
-    --no-os-network-limits-test \
-    --incremental-snapshots \
-    --maximum-full-snapshots-to-retain 2 \
-    --maximum-incremental-snapshots-to-retain 4 \
-    --rpc-send-default-max-retries 0 \
-    --rpc-send-service-max-retries 0 \
-    --rpc-send-retry-ms 2000
+    --log /root/solana-rpc.log
+
     # 以下参数按需选择添加
     # 务必了解每个参数的功能
     # --rpc-bind-address 0.0.0.0 \
