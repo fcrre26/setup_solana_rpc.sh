@@ -26,7 +26,9 @@ menu() {
     echo "10. 查看同步进度"
     echo "11. 调整SWAP空间"
     echo "12. 系统服务管理"
-    echo "13. 退出"
+	echo "13. 查看系统服务日志"
+    echo "14. 查看 Solana RPC 日志"
+    echo "15. 退出"
     echo "============================="
     read -p "输入选项：" option
     case $option in
@@ -42,7 +44,9 @@ menu() {
         10) check_sync_progress;;
         11) adjust_swap;;
         12) service_menu;;
-        13) echo "退出脚本"; exit 0;;
+		13) view_service_logs;;
+		14) view_rpc_logs;;
+        15) echo "退出脚本"; exit 0;;
         *) echo "无效选项，请重新输入";;
     esac
 }
@@ -228,14 +232,25 @@ exec solana-validator \
     --gossip-port 8001 \
     --dynamic-port-range 8000-8020 \
     --wal-recovery-mode skip_any_corrupted_record \
-    --limit-ledger-size \
+    --limit-ledger-size 50000000 \
     --account-index program-id \
-    --account-index spl-token-mint \
-    --account-index spl-token-owner \
     --enable-rpc-transaction-history \
     --enable-cpi-and-log-storage \
     --init-complete-file /root/init-completed \
-    --log /root/solana-rpc.log    
+    --log /root/solana-rpc.log \
+    --accounts-index-memory-limit-mb 1024000 \
+    --maximum-local-snapshot-age 500 \
+    --minimal-snapshot-download-speed 1073741824 \
+    --maximum-snapshot-download-abort 3 \
+    --rpc-send-leader-count 1500 \
+    --no-port-check \
+    --no-os-network-limits-test \
+    --incremental-snapshots \
+    --maximum-full-snapshots-to-retain 2 \
+    --maximum-incremental-snapshots-to-retain 4 \
+    --rpc-send-default-max-retries 0 \
+    --rpc-send-service-max-retries 0 \
+    --rpc-send-retry-ms 2000
     # 以下参数按需选择添加
     # 务必了解每个参数的功能
     # --rpc-bind-address 0.0.0.0 \
@@ -352,7 +367,52 @@ service_menu() {
         *) echo "无效选项，请重新输入"; service_menu;;
     esac
 }
+# -------------------------
+# 模块 13: 查看系统服务日志
+# -------------------------
+view_service_logs() {
+    echo "显示最近 50 条系统服务日志..."
+    journalctl -u sol -n 50
+    echo "按 q 退出日志查看"
+    read -p "按回车返回主菜单"
+    menu
+}
 
+# -------------------------
+# 模块 14: 查看 Solana RPC 日志
+# -------------------------
+view_rpc_logs() {
+    echo "============================="
+    echo "    Solana RPC 日志查看     "
+    echo "============================="
+    echo "1. 查看最近 50 条日志"
+    echo "2. 实时监控日志"
+    echo "3. 返回主菜单"
+    echo "============================="
+    
+    read -p "请选择查看方式 (1-3): " log_option
+    
+    case $log_option in
+        1)
+            echo "显示最近 50 条 RPC 日志..."
+            tail -n 50 /root/solana-rpc.log
+            echo "按回车返回日志菜单"
+            read
+            view_rpc_logs
+            ;;
+        2)
+            echo "实时监控 RPC 日志... (按 Ctrl+C 退出)"
+            tail -f /root/solana-rpc.log
+            ;;
+        3)
+            menu
+            ;;
+        *)
+            echo "无效选项，请重新选择"
+            view_rpc_logs
+            ;;
+    esac
+}
 # 主程序循环
 while true; do
     menu
