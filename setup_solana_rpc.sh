@@ -48,6 +48,7 @@ mount_disks() {
 
     echo "检测到的NVMe设备：$nvme_devs"
     echo "检测到的第二个NVMe设备：$nvme_devs2"
+    
 
     # 创建文件系统并挂载
     mkfs -t ext4 $nvme_devs
@@ -56,7 +57,7 @@ mount_disks() {
 
     mkfs -t ext4 $nvme_devs2
     mount $nvme_devs2 /root/sol/accounts
-    echo "$nvme_devs2 /root/sol/accounts ext4 defaults 0 0" >> /etc/fstab"
+    echo "$nvme_devs2 /root/sol/accounts ext4 defaults 0 0" >> /etc/fstab
 
     sync
 }
@@ -64,7 +65,7 @@ mount_disks() {
 # 设置CPU性能模式
 set_cpu_performance() {
     echo "设置CPU为performance模式..."
-    apt install linux-tools-common linux-tools-$(uname -r)
+    apt install -y linux-tools-common linux-tools-$(uname -r)
     cpupower frequency-set --governor performance
     echo "CPU性能模式已设置为performance。"
     watch "grep 'cpu MHz' /proc/cpuinfo"
