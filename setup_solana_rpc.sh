@@ -253,6 +253,26 @@ adjust_swap() {
     echo "SWAP空间已设置为 $swap_size"
 }
 
+service_menu() {
+    echo "系统服务管理选项："
+    echo "1. 启动Solana服务"
+    echo "2. 查看Solana服务状态"
+    echo "3. 停止Solana服务"
+    echo "4. 重启Solana服务"
+    echo "5. 重新加载systemd"
+    echo "6. 返回主菜单"
+    read -p "输入选项：" service_option
+    case $service_option in
+        1) systemctl start solana-validator;;
+        2) systemctl status solana-validator;;
+        3) systemctl stop solana-validator;;
+        4) systemctl restart solana-validator;;
+        5) systemctl daemon-reload;;
+        6) menu;;
+        *) echo "无效选项，请重新输入"; service_menu;;
+    esac
+}
+
 # 主循环
 while true; do
     menu
