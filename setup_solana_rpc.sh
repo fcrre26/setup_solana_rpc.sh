@@ -198,7 +198,11 @@ enable_firewall() {
 # -------------------------
 create_service() {
     echo "创建启动脚本和服务..."
-    mkdir -p /root/sol/bin
+
+    # 确保 /root/sol 目录存在
+    mkdir -p /root/sol/{accounts,ledger,bin}
+
+    # 创建 Solana 验证器启动脚本
     cat > /root/sol/bin/validator.sh << 'EOF'
 #!/bin/bash
 exec solana-validator \
@@ -206,26 +210,71 @@ exec solana-validator \
     --accounts /root/sol/accounts \
     --identity /root/sol/validator-keypair.json \
     --known-validator 7Np41oeYqPefeNQEHSv1UDhYrehxin3NStELsSKCT4K2 \
+    --known-validator GdnSyH3YtwcxFvQrVVJMm1JhTS4QVX7MFsX56uJLUfiZ \
+    --known-validator DE1bawNcRJB9rVm3buyMVfr8mBEoyyu73NBovf2oXJsJ \
+    --known-validator CakcnaRDHka2gXyfbEd2d3xsvkJkqsLw2akB3zsN1D2S \
     --entrypoint entrypoint.mainnet-beta.solana.com:8001 \
+    --entrypoint entrypoint2.mainnet-beta.solana.com:8001 \
+    --entrypoint entrypoint3.mainnet-beta.solana.com:8001 \
+    --entrypoint entrypoint4.mainnet-beta.solana.com:8001 \
+    --entrypoint entrypoint5.mainnet-beta.solana.com:8001 \
+    --expected-genesis-hash 5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d \
+    --full-rpc-api \
+    --no-voting \
+    --private-rpc \
+    --rpc-port 8899 \
+    --gossip-port 8001 \
+    --dynamic-port-range 8000-8020 \
+    --wal-recovery-mode skip_any_corrupted_record \
+    --limit-ledger-size \
+    --account-index program-id \
+    --account-index spl-token-mint \
+    --account-index spl-token-owner \
+    --enable-rpc-transaction-history \
+    --enable-cpi-and-log-storage \
+    --init-complete-file /root/init-completed \
     --log /root/solana-rpc.log
 EOF
+
+    # 使启动脚本可执行
     chmod +x /root/sol/bin/validator.sh
+
+    # 创建 systemd 服务文件
     cat > /etc/systemd/system/sol.service << 'EOF'
 [Unit]
 Description=Solana Validator
 After=network.target
+StartLimitIntervalSec=0
+
 [Service]
-ExecStart=/root/sol/bin/validator.sh
+Type=simple
 Restart=always
+RestartSec=1
 User=root
 LimitNOFILE=1000000
+LogRateLimitIntervalSec=0
+Environment="PATH=/bin:/usr/bin:/root/.local/share/solana/install/active_release/bin"
+ExecStart=/root/sol/bin/validator.sh
+
 [Install]
 WantedBy=multi-user.target
 EOF
+
+    # 重新加载 systemd 配置
     systemctl daemon-reload
+
+    # 启用服务
     systemctl enable sol
+
+    # 启动服务
     systemctl start sol
-    echo "服务已启动并运行。"
+
+    # 打印服务状态
+    systemctl status sol
+
+    # 打印完成信息并返回主菜单
+    echo "Solana 验证器服务已启动并正在运行。"
+    menu
 }
 
 # -------------------------
