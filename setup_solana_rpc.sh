@@ -224,7 +224,7 @@ exec solana-validator \
     --private-rpc \
     --rpc-port 8899 \
     --rpc-bind-address 0.0.0.0 \
-    --rpc-allow-private-addr \
+    --allow-private-addr \
     --gossip-port 8001 \
     --dynamic-port-range 8000-8020 \
     --wal-recovery-mode skip_any_corrupted_record \
