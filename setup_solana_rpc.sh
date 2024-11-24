@@ -253,6 +253,7 @@ adjust_swap() {
     echo "SWAP空间已设置为 $swap_size"
 }
 
+# 系统服务管理菜单
 service_menu() {
     echo "系统服务管理选项："
     echo "1. 启动Solana服务"
@@ -263,15 +264,38 @@ service_menu() {
     echo "6. 返回主菜单"
     read -p "输入选项：" service_option
     case $service_option in
-        1) systemctl start solana-validator;;
-        2) systemctl status solana-validator;;
-        3) systemctl stop solana-validator;;
-        4) systemctl restart solana-validator;;
-        5) systemctl daemon-reload;;
-        6) menu;;
-        *) echo "无效选项，请重新输入"; service_menu;;
+        1)
+            echo "启动Solana服务..."
+            systemctl start solana-validator
+            ;;
+        2)
+            echo "查看Solana服务状态..."
+            systemctl status solana-validator
+            ;;
+        3)
+            echo "停止Solana服务..."
+            systemctl stop solana-validator
+            ;;
+        4)
+            echo "重启Solana服务..."
+            systemctl restart solana-validator
+            ;;
+        5)
+            echo "重新加载systemd..."
+            systemctl daemon-reload
+            ;;
+        6)
+            echo "返回主菜单..."
+            menu
+            ;;
+        *)
+            echo "无效选项，请重新输入"
+            service_menu
+            ;;
     esac
 }
+
+# 确保在脚本中添加了 service_menu 函数，并且在主菜单中提供了调用它的选项。
 
 # 主循环
 while true; do
