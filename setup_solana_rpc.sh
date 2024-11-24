@@ -13,7 +13,8 @@ menu() {
     echo "8. 启动Solana RPC节点"
     echo "9. 查看同步进度"
     echo "10. 调整SWAP空间"
-    echo "11. 退出"
+    echo "11. 系统服务管理"
+    echo "12. 退出"
     read -p "输入选项：" option
     case $option in
         1) mount_disks;;
@@ -25,8 +26,8 @@ menu() {
         7) create_service;;
         8) start_solana_rpc;;
         9) check_sync_progress;;
-        10) adjust_swap;;
-        11) exit;;
+        11) service_menu;;
+        12) exit;;
         *) echo "无效选项，请重新输入";;
     esac
 }
