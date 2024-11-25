@@ -213,7 +213,7 @@ create_service() {
 exec solana-validator \
     --ledger /root/sol/ledger \
     --accounts /root/sol/accounts \
-    --identity /root/validator-keypair.json \
+    --identity /root/sol/validator-keypair.json \
     --known-validator 7Np41oeYqPefeNQEHSv1UDhYrehxin3NStELsSKCT4K2 \
     --known-validator GdnSyH3YtwcxFvQrVVJMm1JhTS4QVX7MFsX56uJLUfiZ \
     --known-validator DE1bawNcRJB9rVm3buyMVfr8mBEoyyu73NBovf2oXJsJ \
