@@ -83,85 +83,59 @@ install_dependencies() {
 # 模块 2: 挂载磁盘
 # -------------------------
 mount_disks() {
-# 模块 2: 挂载磁盘
-echo "检查并挂载磁盘..."
-sleep 1
+    echo "检查并挂载磁盘..."
+    mkdir -p /root/sol/{accounts,ledger,bin}
 
-# 检测到的 NVMe 设备：
-lsblk -o NAME,SIZE,TYPE | grep nvme
-echo ""
+    # 自动检测 NVMe 设备
+    nvme_devs=$(ls /dev/nvme*n1 2>/dev/null)
+    if [ -z "$nvme_devs" ]; then
+        echo "未检测到 NVMe 设备，请检查硬件连接。"
+        return
+    fi
 
-# 选择第一个磁盘设备（用于 Ledger）
-echo "请选择第一个磁盘设备（用于 Ledger，编号如 nvme0n1）："
-read -p "输入设备编号（例如：nvme0n1）： " ledger_device
-# 选择第二个磁盘设备（用于 Accounts）
-echo "请选择第二个磁盘设备（用于 Accounts，编号如 nvme1n1）："
-read -p "输入设备编号（例如：nvme1n1）： " accounts_device
+    echo "检测到的 NVMe 设备："
+    echo "$nvme_devs"
+    read -p "请选择第一个磁盘设备（用于 Ledger）： " nvme_ledger
+    read -p "请选择第二个磁盘设备（用于 Accounts）： " nvme_accounts
 
-# 确认格式化并挂载
-echo "确认格式化并挂载？输入 yes 继续："
-read -p "输入：" confirm
-if [ "$confirm" != "yes" ]; then
-  echo "挂载操作已取消。"
-  exit 1
-fi
+    if [[ -z "$nvme_ledger" || -z "$nvme_accounts" ]]; then
+        echo "未选择磁盘设备，操作取消。"
+        return
+    fi
 
-echo "正在格式化并挂载设备..."
-sleep 1
+    echo "Ledger: $nvme_ledger -> /root/sol/ledger"
+    echo "Accounts: $nvme_accounts -> /root/sol/accounts"
+    read -p "确认格式化并挂载？输入 yes 继续：" confirm
+    if [[ "$confirm" != "yes" ]]; then
+        echo "操作取消。"
+        return
+    fi
 
-# 检查是否为 RAID 并请求用户确认是否移除
-is_raid() {
-  local device=$1
-  if lsblk -o TYPE,NAME | grep -q "$device.*md"; then
-    return 0 # 是 RAID
-  else
-    return 1 # 不是 RAID
-  fi
+    # 格式化并挂载
+    mkfs -t ext4 "$nvme_ledger"
+    mount "$nvme_ledger" /root/sol/ledger
+    echo "$nvme_ledger /root/sol/ledger ext4 defaults 0 0" >> /etc/fstab
+
+    mkfs -t ext4 "$nvme_accounts"
+    mount "$nvme_accounts" /root/sol/accounts
+    echo "$nvme_accounts /root/sol/accounts ext4 defaults 0 0" >> /etc/fstab
+
+    echo "磁盘挂载完成。"
 }
 
-remove_raid() {
-  local device=$1
-  echo "检测到 $device 是 RAID 设备。是否要移除 RAID 并继续？(yes/no)"
-  read -p "输入：" raid_confirm
-  if [ "$raid_confirm" == "yes" ]; then
-    # 停止 RAID
-    mdadm --stop /dev/$device
-    mdadm --remove /dev/$device
-    echo "RAID 已移除。"
-  else
-    echo "RAID 移除已取消。"
-    exit 1
-  fi
+# -------------------------
+# 模块 3: 设置 CPU 性能模式
+# -------------------------
+set_cpu_performance() {
+    echo "设置 CPU 为 performance 模式..."
+    apt install -y linux-tools-common linux-tools-$(uname -r)
+    if ! command -v cpupower &>/dev/null; then
+        echo "cpupower 未安装，请检查依赖。"
+        return
+    fi
+    cpupower frequency-set --governor performance
+    echo "CPU 性能模式已设置为 performance。"
 }
-
-# 对 Ledger 和 Accounts 设备进行检查和处理
-for device in "$ledger_device" "$accounts_device"; do
-  if is_raid $device; then
-    remove_raid $device
-  fi
-
-  # 获取完整的设备路径
-  full_device_path="/dev/$device"
-
-  # 格式化设备
-  echo "正在格式化 $full_device_path 为 ext4 文件系统..."
-  mkfs.ext4 "$full_device_path"
-
-  # 创建挂载点
-  mkdir -p "/root/sol/ledger"
-  mkdir -p "/root/sol/accounts"
-
-  # 挂载设备
-  echo "正在挂载 $full_device_path 到对应的挂载点..."
-  mount "$full_device_path" "/root/sol/ledger"
-  mount "$full_device_path" "/root/sol/accounts"
-
-  # 添加到 /etc/fstab 以实现开机自动挂载
-  echo "$full_device_path /root/sol/ledger ext4 defaults 0 0" >> /etc/fstab
-  echo "$full_device_path /root/sol/accounts ext4 defaults 0 0" >> /etc/fstab
-done
-
-echo "磁盘挂载完成。"
 
 # -------------------------
 # 模块 4: 下载 Solana CLI
