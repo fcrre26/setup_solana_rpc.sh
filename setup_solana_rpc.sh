@@ -139,22 +139,25 @@ for device in "$ledger_device" "$accounts_device"; do
     remove_raid $device
   fi
 
+  # 获取完整的设备路径
+  full_device_path="/dev/$device"
+
   # 格式化设备
-  echo "正在格式化 $device 为 ext4 文件系统..."
-  mkfs.ext4 "/dev/$device"
+  echo "正在格式化 $full_device_path 为 ext4 文件系统..."
+  mkfs.ext4 "$full_device_path"
 
   # 创建挂载点
   mkdir -p "/root/sol/${device//n1/ledger}"
   mkdir -p "/root/sol/${device//n1/accounts}"
 
   # 挂载设备
-  echo "正在挂载 $device 到对应的挂载点..."
-  mount "/dev/$device" "/root/sol/${device//n1/ledger}"
-  mount "/dev/$device" "/root/sol/${device//n1/accounts}"
+  echo "正在挂载 $full_device_path 到对应的挂载点..."
+  mount "$full_device_path" "/root/sol/${device//n1/ledger}"
+  mount "$full_device_path" "/root/sol/${device//n1/accounts}"
 
   # 添加到 /etc/fstab 以实现开机自动挂载
-  echo "/dev/$device /root/sol/${device//n1/ledger} ext4 defaults 0 0" >> /etc/fstab
-  echo "/dev/$device /root/sol/${device//n1/accounts} ext4 defaults 0 0" >> /etc/fstab
+  echo "$full_device_path /root/sol/${device//n1/ledger} ext4 defaults 0 0" >> /etc/fstab
+  echo "$full_device_path /root/sol/${device//n1/accounts} ext4 defaults 0 0" >> /etc/fstab
 done
 
 echo "磁盘挂载完成。"
