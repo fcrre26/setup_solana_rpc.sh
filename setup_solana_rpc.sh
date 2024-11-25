@@ -83,6 +83,7 @@ install_dependencies() {
 # 模块 2: 挂载磁盘
 # -------------------------
 mount_disks() {
+# 模块 2: 挂载磁盘
 echo "检查并挂载磁盘..."
 sleep 1
 
@@ -161,20 +162,6 @@ for device in "$ledger_device" "$accounts_device"; do
 done
 
 echo "磁盘挂载完成。"
-
-# -------------------------
-# 模块 3: 设置 CPU 性能模式
-# -------------------------
-set_cpu_performance() {
-    echo "设置 CPU 为 performance 模式..."
-    apt install -y linux-tools-common linux-tools-$(uname -r)
-    if ! command -v cpupower &>/dev/null; then
-        echo "cpupower 未安装，请检查依赖。"
-        return
-    fi
-    cpupower frequency-set --governor performance
-    echo "CPU 性能模式已设置为 performance。"
-}
 
 # -------------------------
 # 模块 4: 下载 Solana CLI
