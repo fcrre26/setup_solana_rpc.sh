@@ -147,17 +147,17 @@ for device in "$ledger_device" "$accounts_device"; do
   mkfs.ext4 "$full_device_path"
 
   # 创建挂载点
-  mkdir -p "/root/sol/${device//n1/ledger}"
-  mkdir -p "/root/sol/${device//n1/accounts}"
+  mkdir -p "/root/sol/ledger"
+  mkdir -p "/root/sol/accounts"
 
   # 挂载设备
   echo "正在挂载 $full_device_path 到对应的挂载点..."
-  mount "$full_device_path" "/root/sol/${device//n1/ledger}"
-  mount "$full_device_path" "/root/sol/${device//n1/accounts}"
+  mount "$full_device_path" "/root/sol/ledger"
+  mount "$full_device_path" "/root/sol/accounts"
 
   # 添加到 /etc/fstab 以实现开机自动挂载
-  echo "$full_device_path /root/sol/${device//n1/ledger} ext4 defaults 0 0" >> /etc/fstab
-  echo "$full_device_path /root/sol/${device//n1/accounts} ext4 defaults 0 0" >> /etc/fstab
+  echo "$full_device_path /root/sol/ledger ext4 defaults 0 0" >> /etc/fstab
+  echo "$full_device_path /root/sol/accounts ext4 defaults 0 0" >> /etc/fstab
 done
 
 echo "磁盘挂载完成。"
