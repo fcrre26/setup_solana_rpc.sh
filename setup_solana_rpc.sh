@@ -242,7 +242,7 @@ exec solana-validator \
 
     # 以下参数按需选择添加
     # 务必了解每个参数的功能
-    # --rpc-bind-address 0.0.0.0 \
+    --rpc-bind-address 0.0.0.0 \
     # --tpu-enable-udp \
     # --only-known-rpc \
     # --rpc-send-default-max-retries 0 \
