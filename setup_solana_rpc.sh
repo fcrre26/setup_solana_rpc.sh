@@ -142,7 +142,7 @@ set_cpu_performance() {
 # -------------------------
 download_solana_cli() {
     echo "下载 Solana CLI..."
-    sh -c "$(curl -sSfL https://release.solana.com/v1.18.15/install)"
+    sh -c "$(curl -sSfL https://release.anza.xyz/stable/install)"
     echo 'export PATH="/root/.local/share/solana/install/active_release/bin:$PATH"' >> /root/.bashrc
     export PATH="/root/.local/share/solana/install/active_release/bin:$PATH"
     source /root/.bashrc
