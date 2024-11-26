@@ -226,7 +226,7 @@ exec solana-validator \
     --expected-genesis-hash 5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d \
     --full-rpc-api \
     --no-voting \
-    --private-rpc \
+    # --private-rpc \
     --rpc-port 8899 \
     --gossip-port 8001 \
     --dynamic-port-range 8000-8020 \
