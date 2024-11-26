@@ -255,6 +255,8 @@ exec solana-validator \
     # --accounts-index-memory-limit-mb 1024000 \
     # --limit-ledger-size 50000000 \
     # --minimal-snapshot-download-speed 1073741824 \
+    --incremental-snapshots \ #增量快照功能，并定期生成增量快照
+    # --no-snapshot-fetch \ #快速启动模式，直接从本地数据恢复
 EOF
 
     # 使启动脚本可执行
