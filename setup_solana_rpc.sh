@@ -44,8 +44,8 @@ menu() {
         10) check_sync_progress;;
         11) adjust_swap;;
         12) service_menu;;
-        13) view_service_logs;;
-        14) view_rpc_logs;;
+		13) view_service_logs;;
+		14) view_rpc_logs;;
         15) echo "退出脚本"; exit 0;;
         *) echo "无效选项，请重新输入";;
     esac
@@ -138,13 +138,14 @@ set_cpu_performance() {
 }
 
 # -------------------------
-# 模块 4: 下载Solana CLI
+# 模块 4: 下载 Solana CLI
 # -------------------------
 download_solana_cli() {
     echo "下载 Solana CLI..."
-    sh -c "$(curl -sSfL https://release.anza.xyz/v2.1.0/install)"
-    echo 'export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"' >> ~/.bashrc
-    source ~/.bashrc
+    sh -c "$(curl -sSfL https://release.solana.com/v1.18.15/install)"
+    echo 'export PATH="/root/.local/share/solana/install/active_release/bin:$PATH"' >> /root/.bashrc
+    export PATH="/root/.local/share/solana/install/active_release/bin:$PATH"
+    source /root/.bashrc
     solana --version
 }
 
@@ -217,7 +218,7 @@ exec solana-validator \
     --known-validator GdnSyH3YtwcxFvQrVVJMm1JhTS4QVX7MFsX56uJLUfiZ \
     --known-validator DE1bawNcRJB9rVm3buyMVfr8mBEoyyu73NBovf2oXJsJ \
     --known-validator CakcnaRDHka2gXyfbEd2d3xsvkJkqsLw2akB3zsN1D2S \
-        --entrypoint entrypoint.mainnet-beta.solana.com:8001 \
+    --entrypoint entrypoint.mainnet-beta.solana.com:8001 \
     --entrypoint entrypoint2.mainnet-beta.solana.com:8001 \
     --entrypoint entrypoint3.mainnet-beta.solana.com:8001 \
     --entrypoint entrypoint4.mainnet-beta.solana.com:8001 \
@@ -225,6 +226,7 @@ exec solana-validator \
     --expected-genesis-hash 5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d \
     --full-rpc-api \
     --no-voting \
+    # --private-rpc \
     --rpc-port 8899 \
     --gossip-port 8001 \
     --dynamic-port-range 8000-8020 \
@@ -356,7 +358,6 @@ service_menu() {
         *) echo "无效选项，请重新输入"; service_menu;;
     esac
 }
-
 # -------------------------
 # 模块 13: 查看系统服务日志
 # -------------------------
@@ -403,7 +404,6 @@ view_rpc_logs() {
             ;;
     esac
 }
-
 # 主程序循环
 while true; do
     menu
