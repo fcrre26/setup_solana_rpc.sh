@@ -238,7 +238,7 @@ exec solana-validator \
     --enable-rpc-transaction-history \
     --enable-cpi-and-log-storage \
     --init-complete-file /root/init-completed \
-    --log /root/solana-rpc.log
+    --log /root/solana-rpc.log \
 
     # 以下参数按需选择添加
     # 务必了解每个参数的功能
