@@ -44,8 +44,8 @@ menu() {
         10) check_sync_progress;;
         11) adjust_swap;;
         12) service_menu;;
-		13) view_service_logs;;
-		14) view_rpc_logs;;
+        13) view_service_logs;;
+        14) view_rpc_logs;;
         15) echo "退出脚本"; exit 0;;
         *) echo "无效选项，请重新输入";;
     esac
@@ -137,15 +137,14 @@ set_cpu_performance() {
     echo "CPU 性能模式已设置为 performance。"
 }
 
-## -------------------------
-# 模块 4: 下载 Solana CLI
+# -------------------------
+# 模块 4: 下载Solana CLI
 # -------------------------
 download_solana_cli() {
     echo "下载 Solana CLI..."
     sh -c "$(curl -sSfL https://release.anza.xyz/v2.1.0/install)"
-    echo 'export PATH="/root/.local/share/solana/install/active_release/bin:$PATH"' >> /root/.bashrc
-    export PATH="/root/.local/share/solana/install/active_release/bin:$PATH"
-    source /root/.bashrc
+    echo 'export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"' >> ~/.bashrc
+    source ~/.bashrc
     solana --version
 }
 
@@ -163,16 +162,13 @@ create_validator_keypair() {
 # -------------------------
 sys_tuning() {
     echo "进行系统调优..."
-    tuning_params=( 
+    tuning_params=(
         "net.core.rmem_default=134217728"
         "net.core.rmem_max=134217728"
         "net.core.wmem_default=134217728"
         "net.core.wmem_max=134217728"
         "vm.max_map_count=1000000"
         "fs.nr_open=1000000"
-        "net.ipv4.tcp_rmem=4096 87380 134217728"
-        "net.ipv4.tcp_wmem=4096 65536 134217728"
-        "net.ipv4.tcp_window_scaling=1"
     )
     for param in "${tuning_params[@]}"; do
         if ! grep -q "$param" /etc/sysctl.conf; then
@@ -221,26 +217,29 @@ exec solana-validator \
     --known-validator GdnSyH3YtwcxFvQrVVJMm1JhTS4QVX7MFsX56uJLUfiZ \
     --known-validator DE1bawNcRJB9rVm3buyMVfr8mBEoyyu73NBovf2oXJsJ \
     --known-validator CakcnaRDHka2gXyfbEd2d3xsvkJkqsLw2akB3zsN1D2S \
-    --entrypoint entrypoint.mainnet-beta.solana.com:8001 \
+        --entrypoint entrypoint.mainnet-beta.solana.com:8001 \
     --entrypoint entrypoint2.mainnet-beta.solana.com:8001 \
     --entrypoint entrypoint3.mainnet-beta.solana.com:8001 \
     --entrypoint entrypoint4.mainnet-beta.solana.com:8001 \
+    --entrypoint entrypoint5.mainnet-beta.solana.com:8001 \
     --expected-genesis-hash 5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d \
     --full-rpc-api \
     --no-voting \
     --rpc-port 8899 \
     --gossip-port 8001 \
     --dynamic-port-range 8000-8020 \
+    --wal-recovery-mode skip_any_corrupted_record \
     --limit-ledger-size \
     --account-index program-id \
     --account-index spl-token-mint \
     --account-index spl-token-owner \
     --enable-rpc-transaction-history \
     --enable-cpi-and-log-storage \
-    --incremental-snapshots \
+    --init-complete-file /root/init-completed \
     --log /root/solana-rpc.log
 
     # 以下参数按需选择添加
+    # 务必了解每个参数的功能
     --rpc-bind-address 0.0.0.0 \
     # --tpu-enable-udp \
     # --only-known-rpc \
@@ -254,7 +253,8 @@ exec solana-validator \
     # --accounts-index-memory-limit-mb 1024000 \
     # --limit-ledger-size 50000000 \
     # --minimal-snapshot-download-speed 1073741824 \
-    # --no-snapshot-fetch \
+    --incremental-snapshots \ #增量快照功能，并定期生成增量快照
+    # --no-snapshot-fetch \ #快速启动模式，直接从本地数据恢复
 EOF
 
     # 使启动脚本可执行
@@ -304,8 +304,6 @@ EOF
 start_solana_rpc() {
     echo "启动 Solana RPC 节点..."
     systemctl start sol
-    echo "检查节点状态..."
-    systemctl status sol
 }
 
 # -------------------------
@@ -316,8 +314,9 @@ check_sync_progress() {
     validator_pubkey=$(solana-keygen pubkey /root/sol/validator-keypair.json)
     echo "您的验证者公钥是：$validator_pubkey"
     solana gossip | grep "$validator_pubkey"
-    solana catchup "$validator_pubkey" http://127.0.0.1:8899
+    solana catchup "$validator_pubkey"
 }
+
 # -------------------------
 # 模块 11: 调整 SWAP 空间
 # -------------------------
@@ -357,6 +356,7 @@ service_menu() {
         *) echo "无效选项，请重新输入"; service_menu;;
     esac
 }
+
 # -------------------------
 # 模块 13: 查看系统服务日志
 # -------------------------
@@ -403,6 +403,7 @@ view_rpc_logs() {
             ;;
     esac
 }
+
 # 主程序循环
 while true; do
     menu
