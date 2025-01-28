@@ -142,7 +142,14 @@ set_cpu_performance() {
 # -------------------------
 download_solana_cli() {
     echo "下载 Solana CLI..."
-    # 使用用户指定的链接
+    
+    # 检查是否有 root 权限
+    if [ "$(id -u)" != "0" ]; then
+        echo "请使用 root 权限运行此脚本"
+        return 1
+    fi
+
+    # 下载并安装 Solana CLI
     if ! sh -c "$(curl -sSfL https://release.anza.xyz/v2.0.18/install)"; then
         echo "下载 Solana CLI 时遇到问题。"
         echo "请检查以下内容："
@@ -151,15 +158,31 @@ download_solana_cli() {
         return 1
     fi
 
-    # 更新 PATH 环境变量
-    echo 'export PATH="/root/.local/share/solana/install/active_release/bin:$PATH"' >> /root/.bashrc
-    echo 'export PATH="/root/.local/share/solana/install/active_release/bin:$PATH"' >> /root/.profile
+    # 设置 Solana 路径
+    SOLANA_PATH="/root/.local/share/solana/install/active_release/bin"
+    
+    # 更新当前会话的 PATH
+    export PATH="$SOLANA_PATH:$PATH"
+    
+    # 添加到配置文件（为后续登录做准备）
+    if ! grep -q "$SOLANA_PATH" /root/.bashrc; then
+        echo "export PATH=\"$SOLANA_PATH:\$PATH\"" >> /root/.bashrc
+    fi
+    
+    if ! grep -q "$SOLANA_PATH" /root/.profile; then
+        echo "export PATH=\"$SOLANA_PATH:\$PATH\"" >> /root/.profile
+    fi
 
-    # 重新加载环境变量
-    source /root/.bashrc
-    source /root/.profile
+    # 等待几秒钟让系统完成安装
+    sleep 2
 
-    # 验证 Solana CLI 版本
+    # 验证安装
+    if ! command -v solana &> /dev/null; then
+        echo "Solana CLI 安装失败，无法在系统中找到 solana 命令"
+        return 1
+    fi
+
+    # 验证版本
     if ! solana --version; then
         echo "Solana CLI 安装成功，但无法运行。请检查 PATH 环境变量是否正确设置。"
         return 1
@@ -167,8 +190,12 @@ download_solana_cli() {
 
     echo "Solana CLI 安装成功，版本信息如下："
     solana --version
+    
+    echo -e "\n注意：环境变量已在当前会话中更新。如果打开新的终端，请运行以下命令或重新登录："
+    echo "export PATH=\"$SOLANA_PATH:\$PATH\""
+    
+    return 0
 }
-
 
 # -------------------------
 # 模块 5: 创建验证者私钥
