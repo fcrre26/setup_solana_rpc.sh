@@ -148,15 +148,17 @@ download_solana_cli() {
         echo "请检查以下内容："
         echo "1. 确保链接 'https://release.anza.xyz/v2.0.18/install' 是有效的。"
         echo "2. 检查网络连接是否正常。"
-        echo "3. 如果链接无效，请尝试使用 Solana 官方提供的链接 'https://release.solana.com/v2.0.18/install'。"
         return 1
     fi
-    
+
     # 更新 PATH 环境变量
     echo 'export PATH="/root/.local/share/solana/install/active_release/bin:$PATH"' >> /root/.bashrc
-    export PATH="/root/.local/share/solana/install/active_release/bin:$PATH"
+    echo 'export PATH="/root/.local/share/solana/install/active_release/bin:$PATH"' >> /root/.profile
+
+    # 重新加载环境变量
     source /root/.bashrc
-    
+    source /root/.profile
+
     # 验证 Solana CLI 版本
     if ! solana --version; then
         echo "Solana CLI 安装成功，但无法运行。请检查 PATH 环境变量是否正确设置。"
