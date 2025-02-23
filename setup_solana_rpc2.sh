@@ -301,6 +301,7 @@ exec solana-validator \
     # --rpc-send-leader-count 1500 \
     # --private-rpc \
     # --accounts-index-memory-limit-mb 1024000 \
+    # --forward-transactions-to http://localhost:8080  
     # --limit-ledger-size 50000000 \
     # --minimal-snapshot-download-speed 1073741824 \
     --incremental-snapshots \ #增量快照功能，并定期生成增量快照
